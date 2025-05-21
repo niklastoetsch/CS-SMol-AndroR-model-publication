@@ -56,9 +56,14 @@ def run_or_retrieve_from_disc(X, y, groups=None, n_splits=5, n_repetitions=5, tr
     if os.path.exists(filename):
         with open(filename, 'rb') as f:
             splits = pickle.load(f)
+        with open(f"pipelines_{training_name}.pkl", 'rb') as f:
+            pipelines_created = pickle.load(f)
     else:
         splits = run_cv(X, y, groups=groups, n_splits=n_splits, n_repetitions=n_repetitions, training_name=training_name)
+        pipelines_created = {k: v for k, v in PIPELINE_REGISTRY.items() if k.startswith(training_name)}
         with open(filename, 'wb') as f:
             pickle.dump(splits, f)
+        with open(f"pipelines_{training_name}.pkl", 'wb') as f:
+            pickle.dump(pipelines_created, f)
 
-    return splits
+    return splits, pipelines_created
