@@ -1,3 +1,6 @@
+import os
+import pickle
+
 import tqdm
 
 from sklearn.model_selection import StratifiedGroupKFold
@@ -18,7 +21,7 @@ def run_cv(X, y, groups=None, n_splits=5, n_repetitions=5, training_name=""):
     splits = []
 
     for i in tqdm.tqdm(range(n_repetitions), total=n_repetitions, desc=f"Repetitions"):
-        cv_spec = StratifiedGroupKFold(n_splits=n_splits)
+        cv_spec = StratifiedGroupKFold(n_splits=n_splits, random_state=i, shuffle=True)
         split_obj = cv_spec.split(X, y, groups=groups)
     
         for ii, indeces in tqdm.tqdm(enumerate(split_obj), total=n_splits, desc=f"Splits"):
@@ -40,5 +43,22 @@ def run_cv(X, y, groups=None, n_splits=5, n_repetitions=5, training_name=""):
                 "y_hat": y_pred, 
                 "y_hat_proba": y_hat_proba, 
                 "val_index": val_index})
+
+    return splits
+
+
+def run_or_retrieve_from_disc(X, y, groups=None, n_splits=5, n_repetitions=5, training_name=""):
+    """
+    Run the cross-validation and save the results to disk.
+    If the results already exist on disk, load them instead of running the cross-validation again.
+    """
+    filename = f"splits_{training_name}.pkl"
+    if os.path.exists(filename):
+        with open(filename, 'rb') as f:
+            splits = pickle.load(f)
+    else:
+        splits = run_cv(X, y, groups=groups, n_splits=n_splits, n_repetitions=n_repetitions, training_name=training_name)
+        with open(filename, 'wb') as f:
+            pickle.dump(splits, f)
 
     return splits
