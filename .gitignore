@@ -1,0 +1,2 @@
+# don't commit the pickle files: they would clutter the repo and are not intended for long-term storage
+*pkl
