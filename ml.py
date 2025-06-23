@@ -1,11 +1,13 @@
 import os
+import numpy as np
 import pickle
 
 import tqdm
 
 from sklearn.model_selection import StratifiedGroupKFold
 from sklearn.pipeline import Pipeline
-from catboost import CatBoostClassifier
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.utils.class_weight import compute_class_weight
 
 
 PIPELINE_REGISTRY = {}
@@ -13,7 +15,7 @@ PIPELINE_REGISTRY = {}
 
 def create_pipeline():
     return Pipeline(steps=[
-        ('classifier', CatBoostClassifier(auto_class_weights='Balanced', verbose=False)),
+        ('classifier', GradientBoostingClassifier(verbose=False)),
 ])
 
 
@@ -28,11 +30,18 @@ def run_cv(X, y, groups=None, n_splits=5, n_repetitions=5, training_name=""):
             train_index, val_index = indeces
             X_train_fold, X_val_fold = X.iloc[train_index], X.iloc[val_index]
             y_train_fold, y_val_fold = y.iloc[train_index], y.iloc[val_index]
-            
+
+            # Compute sample weights for GBT
+            classes = np.unique(y_train_fold)
+            weights = compute_class_weight(class_weight='balanced', classes=classes, y=y_train_fold)
+            sample_weights = np.ones_like(y_train_fold, dtype=float)
+            for idx, cls in enumerate(classes):
+                sample_weights[y_train_fold == cls] = weights[idx]
+
             # Fit the pipeline
             pipeline = create_pipeline()
             PIPELINE_REGISTRY[f"{training_name}_{i}.{ii}"] = pipeline
-            pipeline.fit(X_train_fold, y_train_fold)
+            pipeline.fit(X_train_fold, y_train_fold, classifier__sample_weight=sample_weights)
             
             # Make predictions
             y_pred = pipeline.predict(X_val_fold)
