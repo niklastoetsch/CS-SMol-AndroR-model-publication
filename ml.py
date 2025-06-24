@@ -56,23 +56,24 @@ def run_cv(X, y, groups=None, n_splits=5, n_repetitions=5, training_name=""):
     return splits
 
 
-def run_or_retrieve_from_disc(X, y, groups=None, n_splits=5, n_repetitions=5, training_name=""):
+def run_or_retrieve_from_disc(X, y, groups=None, n_splits=5, n_repetitions=5, training_name="", folder="."):
     """
     Run the cross-validation and save the results to disk.
     If the results already exist on disk, load them instead of running the cross-validation again.
     """
-    filename = f"splits_{training_name}.pkl"
-    if os.path.exists(filename):
-        with open(filename, 'rb') as f:
+    results_filename = f"{folder}/splits_{training_name}.pkl"
+    pipelines_filename = f"{folder}/pipelines_{training_name}.pkl"
+    if os.path.exists(results_filename):
+        with open(results_filename, 'rb') as f:
             splits = pickle.load(f)
-        with open(f"pipelines_{training_name}.pkl", 'rb') as f:
+        with open(pipelines_filename, 'rb') as f:
             pipelines_created = pickle.load(f)
     else:
         splits = run_cv(X, y, groups=groups, n_splits=n_splits, n_repetitions=n_repetitions, training_name=training_name)
         pipelines_created = {k: v for k, v in PIPELINE_REGISTRY.items() if k.startswith(training_name)}
-        with open(filename, 'wb') as f:
+        with open(results_filename, 'wb') as f:
             pickle.dump(splits, f)
-        with open(f"pipelines_{training_name}.pkl", 'wb') as f:
+        with open(pipelines_filename, 'wb') as f:
             pickle.dump(pipelines_created, f)
 
     return splits, pipelines_created
