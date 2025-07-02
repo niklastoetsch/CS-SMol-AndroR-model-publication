@@ -19,6 +19,16 @@ def create_pipeline():
 ])
 
 
+def compute_sample_weights(y_train_fold):   
+    classes = np.unique(y_train_fold)
+    weights = compute_class_weight(class_weight='balanced', classes=classes, y=y_train_fold)
+    sample_weights = np.ones_like(y_train_fold, dtype=float)
+    for idx, cls in enumerate(classes):
+        sample_weights[y_train_fold == cls] = weights[idx]
+    
+    return sample_weights
+
+
 def run_cv(X, y, groups=None, n_splits=5, n_repetitions=5, training_name=""):
     splits = []
 
@@ -31,12 +41,7 @@ def run_cv(X, y, groups=None, n_splits=5, n_repetitions=5, training_name=""):
             X_train_fold, X_val_fold = X.iloc[train_index], X.iloc[val_index]
             y_train_fold, y_val_fold = y.iloc[train_index], y.iloc[val_index]
 
-            # Compute sample weights for GBT
-            classes = np.unique(y_train_fold)
-            weights = compute_class_weight(class_weight='balanced', classes=classes, y=y_train_fold)
-            sample_weights = np.ones_like(y_train_fold, dtype=float)
-            for idx, cls in enumerate(classes):
-                sample_weights[y_train_fold == cls] = weights[idx]
+            sample_weights = compute_sample_weights(y_train_fold)
 
             # Fit the pipeline
             pipeline = create_pipeline()
