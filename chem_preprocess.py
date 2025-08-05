@@ -65,7 +65,7 @@ def standardize_smiles_rdkit(df):
                 
                     lm = rdMolStandardize.FragmentParent(im)
 
-                    #te = rdMolStandardize.TautomerEnumerator()  # Kai strongly recommends to NOT use the default canonical_smiles generator from RDkit
+                    #te = rdMolStandardize.TautomerEnumerator()  
                     #std_mol = te.Canonicalize(lm)
                     
                     # get smiles for standardized molecule
@@ -192,8 +192,7 @@ def handle_duplicates(df):
         raise
 
 if __name__ == "__main__":
-    #input_filepath = "original_skripte_britta/data/AndroR_4_final_dataset_training_ALL.csv"
-    input_filepath = "original_skripte_britta/data/AndroR_holdout_pix_rat.csv"
+    input_filepath = "data/Supp_file_S2_Result_Table.csv"
     
     # Create output filename by adding _STD before the extension
     base_path = os.path.splitext(input_filepath)[0]  # Remove extension
@@ -219,4 +218,5 @@ if __name__ == "__main__":
     print(f"\nResults saved:")
     print(f"Clean data saved to: {output_filepath}")
     print(f"Conflicts saved to: {conflicts_filepath}")
+
     
