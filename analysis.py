@@ -1,19 +1,82 @@
+"""
+Analysis and Evaluation Tools for Androgen Receptor Prediction Models
+
+This module provides classes and functions for evaluating binary classification
+models in the context of chemical toxicity prediction, with emphasis on metrics
+relevant to regulatory and screening applications.
+"""
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from typing import Tuple, List, Optional
 from sklearn.metrics import roc_curve, precision_recall_curve, classification_report
 from sklearn.calibration import calibration_curve
 
 
-def calc_npv(tpr, tnr, prevalence):
+def calc_npv(tpr: float, tnr: float, prevalence: float) -> float:
+    """
+    Calculate Negative Predictive Value from sensitivity, specificity, and prevalence.
+    
+    Parameters
+    ----------
+    tpr : float
+        True Positive Rate (sensitivity)
+    tnr : float  
+        True Negative Rate (specificity)
+    prevalence : float
+        Prevalence of positive class in population
+        
+    Returns
+    -------
+    float
+        Negative Predictive Value
+    """
     return tnr * (1-prevalence) / ((tnr * (1-prevalence)) + (1 - tpr) * prevalence)
 
 
-def calc_precision(tpr, tnr, prevalence):
+def calc_precision(tpr: float, tnr: float, prevalence: float) -> float:
+    """
+    Calculate Precision (PPV) from sensitivity, specificity, and prevalence.
+    
+    Parameters
+    ----------
+    tpr : float
+        True Positive Rate (sensitivity)
+    tnr : float
+        True Negative Rate (specificity)  
+    prevalence : float
+        Prevalence of positive class in population
+        
+    Returns
+    -------
+    float
+        Precision (Positive Predictive Value)
+    """
     return tpr * (prevalence) / ((tpr * (prevalence)) + (1 - tnr) * (1-prevalence))
 
 
-def calc_mcc(tpr, tnr, prevalence):
+def calc_mcc(tpr: float, tnr: float, prevalence: float) -> float:
+    """
+    Calculate Matthews Correlation Coefficient from sensitivity, specificity, and prevalence.
+    
+    The MCC is a robust metric for binary classification that accounts for class
+    imbalance and all elements of the confusion matrix.
+    
+    Parameters
+    ----------
+    tpr : float
+        True Positive Rate (sensitivity)
+    tnr : float
+        True Negative Rate (specificity)
+    prevalence : float
+        Prevalence of positive class in population
+        
+    Returns
+    -------
+    float
+        Matthews Correlation Coefficient (-1 to 1)
+    """
     ppv = calc_precision(tpr, tnr, prevalence)
     npv = calc_npv(tpr, tnr, prevalence)
     fdr = 1 - ppv
@@ -24,6 +87,32 @@ def calc_mcc(tpr, tnr, prevalence):
 
 
 class Predictions:
+    """
+    Analysis class for binary classification predictions.
+    
+    Provides comprehensive evaluation metrics and visualizations for binary
+    classification models, particularly suited for chemical toxicity prediction.
+    
+    Parameters
+    ----------
+    y : array-like
+        True labels
+    y_hat : array-like  
+        Predicted labels
+    y_hat_proba : array-like, shape (n_samples, 2)
+        Predicted probabilities for each class
+    **kwargs
+        Additional keyword arguments
+        
+    Attributes
+    ----------
+    y : array-like
+        True labels
+    y_hat : array-like
+        Predicted labels  
+    y_hat_proba : array-like
+        Predicted probabilities
+    """
 
     def __init__(self, y, y_hat, y_hat_proba, **kwargs):
         self.y = y
@@ -31,7 +120,15 @@ class Predictions:
         self.y_hat_proba = y_hat_proba
 
     @property
-    def prevalence(self):
+    def prevalence(self) -> float:
+        """
+        Calculate prevalence of positive class ('inhibitor').
+        
+        Returns
+        -------
+        float
+            Fraction of samples that are inhibitors
+        """
         return (self.y == "inhibitor").mean()
 
     def plot_all_metrics(self):

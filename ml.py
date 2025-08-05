@@ -1,6 +1,15 @@
+"""
+Machine Learning Pipeline for Androgen Receptor Inhibition Prediction
+
+This module provides the core machine learning functionality for predicting
+chemical inhibitory activity against the androgen receptor using gradient
+boosting classifiers with stratified group cross-validation.
+"""
+
 import os
 import numpy as np
 import pickle
+from typing import Dict, List, Tuple, Optional, Any
 
 import tqdm
 
@@ -13,13 +22,47 @@ from sklearn.utils.class_weight import compute_class_weight
 PIPELINE_REGISTRY = {}
 
 
-def create_pipeline():
+def create_pipeline() -> Pipeline:
+    """
+    Create a machine learning pipeline for androgen receptor prediction.
+    
+    Returns
+    -------
+    Pipeline
+        Scikit-learn pipeline with GradientBoostingClassifier
+        
+    Examples
+    --------
+    >>> pipeline = create_pipeline()
+    >>> pipeline.named_steps.keys()
+    dict_keys(['classifier'])
+    """
     return Pipeline(steps=[
         ('classifier', GradientBoostingClassifier(verbose=False)),
-])
+    ])
 
 
-def compute_sample_weights(y_train_fold):
+def compute_sample_weights(y_train_fold: np.ndarray) -> np.ndarray:
+    """
+    Compute balanced sample weights for training data to handle class imbalance.
+    
+    Parameters
+    ----------
+    y_train_fold : np.ndarray
+        Training labels for current cross-validation fold
+        
+    Returns
+    -------
+    np.ndarray
+        Sample weights for balanced training, same shape as y_train_fold
+        
+    Examples
+    --------
+    >>> y = np.array(['inhibitor', 'inactive', 'inhibitor'])
+    >>> weights = compute_sample_weights(y)
+    >>> len(weights) == len(y)
+    True
+    """
     classes = np.unique(y_train_fold)
     weights = compute_class_weight(class_weight='balanced', classes=classes, y=y_train_fold)
     sample_weights = np.ones_like(y_train_fold, dtype=float)
@@ -29,7 +72,48 @@ def compute_sample_weights(y_train_fold):
     return sample_weights
 
 
-def run_cv(X, y, groups=None, n_splits=5, n_repetitions=5, training_name=""):
+def run_cv(X, y, groups=None, n_splits: int = 5, n_repetitions: int = 5, training_name: str = "") -> List[Dict[str, Any]]:
+    """
+    Run stratified group cross-validation for molecular data.
+    
+    Performs repeated stratified group k-fold cross-validation, ensuring that
+    molecules from the same cluster are not split across train/test sets while
+    maintaining class balance.
+    
+    Parameters
+    ----------
+    X : DataFrame
+        Feature matrix (typically molecular fingerprints or descriptors)
+    y : Series
+        Target labels (e.g., 'inhibitor', 'inactive')
+    groups : Series, optional
+        Group labels for molecules (e.g., cluster IDs)
+    n_splits : int, default=5
+        Number of cross-validation folds
+    n_repetitions : int, default=5
+        Number of repetitions with different random seeds
+    training_name : str, default=""
+        Name prefix for storing trained pipelines
+        
+    Returns
+    -------
+    List[Dict[str, Any]]
+        List of dictionaries containing validation results for each fold:
+        - 'y': true labels
+        - 'y_hat': predicted labels  
+        - 'y_hat_proba': predicted probabilities
+        - 'val_index': validation set indices
+        
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> X = pd.DataFrame({'fp_0': [1, 0, 1], 'fp_1': [0, 1, 1]})
+    >>> y = pd.Series(['inhibitor', 'inactive', 'inhibitor'])
+    >>> groups = pd.Series([0, 1, 0])
+    >>> results = run_cv(X, y, groups, n_splits=2, n_repetitions=1)
+    >>> len(results) == 2  # n_splits
+    True
+    """
     splits = []
 
     for i in tqdm.tqdm(range(n_repetitions), total=n_repetitions, desc=f"Repetitions"):
@@ -61,10 +145,41 @@ def run_cv(X, y, groups=None, n_splits=5, n_repetitions=5, training_name=""):
     return splits
 
 
-def run_or_retrieve_from_disc(X, y, groups=None, n_splits=5, n_repetitions=5, training_name="", folder="."):
+def run_or_retrieve_from_disc(X, y, groups=None, n_splits: int = 5, n_repetitions: int = 5, 
+                             training_name: str = "", folder: str = ".") -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
     """
-    Run the cross-validation and save the results to disk.
-    If the results already exist on disk, load them instead of running the cross-validation again.
+    Run cross-validation or load results from disk if they exist.
+    
+    This function implements caching to avoid re-running expensive cross-validation
+    when results already exist on disk.
+    
+    Parameters
+    ----------
+    X : DataFrame
+        Feature matrix
+    y : Series  
+        Target labels
+    groups : Series, optional
+        Group labels for molecules
+    n_splits : int, default=5
+        Number of cross-validation folds
+    n_repetitions : int, default=5
+        Number of repetitions with different random seeds
+    training_name : str, default=""
+        Name prefix for file storage
+    folder : str, default="."
+        Directory to save/load results
+        
+    Returns
+    -------
+    Tuple[List[Dict[str, Any]], Dict[str, Any]]
+        Cross-validation results and trained pipelines
+        
+    Notes
+    -----
+    Results are saved as pickle files:
+    - splits_{training_name}.pkl: Cross-validation results
+    - pipelines_{training_name}.pkl: Trained model pipelines
     """
     results_filename = f"{folder}/splits_{training_name}.pkl"
     pipelines_filename = f"{folder}/pipelines_{training_name}.pkl"
