@@ -66,7 +66,7 @@ def get_rdkit_descriptors(df: pd.DataFrame, SMILES_column: str = "flat_smiles") 
     for idx, r in tqdm.tqdm(df.iterrows(), desc="Calculating RDKit descriptors", total=len(df)):
         mol = Chem.MolFromSmiles(r[SMILES_column])
         if mol is None:
-            print("Error: Invalid SMILES string:", r[SMILES_column])
+            print(f"Error: Invalid SMILES string at index {idx}: {r[SMILES_column]}")
             continue
         rdkit_descriptors[idx] = pd.Series(Chem.Descriptors.CalcMolDescriptors(mol))
 
