@@ -1,8 +1,9 @@
 import pandas as pd
 import numpy as np
 from rdkit import Chem
-from rdkit.Chem import AllChem, DataStructs
+from rdkit.Chem import AllChem, DataStructs, Descriptors
 from rdkit.SimDivFilters import rdSimDivPickers
+import tqdm
 
 
 N_BITS = 1024
@@ -56,3 +57,19 @@ def add_fingerprints_to_df(df: pd.DataFrame) -> pd.DataFrame:
     fingerprints_df = pd.DataFrame(np.array(fingerprints), columns=FP_COLUMNS, index=df.index)
     df = pd.concat([df, fingerprints_df], axis=1)
     return df
+
+
+def get_rdkit_descriptors(df: pd.DataFrame, SMILES_column: str = "flat_smiles") -> pd.DataFrame:
+
+    rdkit_descriptors = {}
+
+    for idx, r in tqdm.tqdm(df.iterrows(), desc="Calculating RDKit descriptors", total=len(df)):
+        mol = Chem.MolFromSmiles(r[SMILES_column])
+        if mol is None:
+            print(f"Error: Invalid SMILES string at index {idx}: {r[SMILES_column]}")
+            continue
+        rdkit_descriptors[idx] = pd.Series(Chem.Descriptors.CalcMolDescriptors(mol))
+
+    rdkit_descriptors = pd.DataFrame(rdkit_descriptors).T
+
+    return rdkit_descriptors
