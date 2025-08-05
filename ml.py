@@ -19,7 +19,7 @@ def create_pipeline():
 ])
 
 
-def compute_sample_weights(y_train_fold):   
+def compute_sample_weights(y_train_fold):
     classes = np.unique(y_train_fold)
     weights = compute_class_weight(class_weight='balanced', classes=classes, y=y_train_fold)
     sample_weights = np.ones_like(y_train_fold, dtype=float)
