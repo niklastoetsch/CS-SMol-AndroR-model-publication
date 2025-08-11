@@ -6,10 +6,9 @@ This repository contains the code and analysis for computational toxicology mode
 
 ## Key Features
 
-- **Machine Learning Pipeline**: Gradient boosting classifier with stratified group cross-validation
-- **Multiple Feature Representations**: Support for molecular fingerprints and RDKit descriptors  
-- **Comprehensive Analysis**: SHAP explainability, clustering analysis, and performance evaluation
-- **Robust Evaluation**: Balanced accuracy, ROC analysis, calibration curves, and multiple metrics
+- **Machine Learning Pipeline**: Gradient boosting classifier with stratified group cross-validation based on Tanimoto clusters
+- **Multiple Feature Representations**: Support for molecular fingerprints and RDKit descriptors
+- **Analysis**: SHAP explainability and performance evaluation
 
 ## Repository Structure
 
@@ -24,6 +23,8 @@ This repository contains the code and analysis for computational toxicology mode
 ```
 
 ## Installation
+
+See `Installation.md` for details
 
 ### Requirements
 
@@ -62,38 +63,16 @@ pip install -r requirements.txt
 
 These files should be placed in the parent directory (`../`) relative to the notebook locations.
 
-## Usage
+## Reproducing the Results from the Paper
 
-### Running the Analysis
-
-1. **Main workflow**: Execute `unrestricted_dataset.ipynb` for the primary analysis
-2. **Feature comparison**: Run `comparison_for_different_feature_spaces.ipynb` 
-3. **Clustering analysis**: Execute `fingerprint_based_clustering.ipynb`
+1. **Clustering analysis**: Execute `fingerprint_based_clustering.ipynb` to obtain the Tanimoto clusters 
+2. **Feature comparison**: Run `comparison_for_different_feature_spaces.ipynb`
+3. **Comparison between full and unrestricted datasets and predictions on CoMPARA dataset**: Execute `unrestricted_dataset.ipynb` for the primary analysis
 4. **Model interpretation**: Run `SHAP_analysis.ipynb`
 
-### Using the ML Pipeline
-
-```python
-from ml import run_cv
-from utils import add_fingerprints_to_df
-import pandas as pd
-
-# Load your data
-df = pd.read_csv("your_dataset.csv")
-
-# Add molecular fingerprints
-df = add_fingerprints_to_df(df)
-
-# Prepare features and labels
-X = df[['fp_0', 'fp_1', ...]]  # fingerprint columns
-y = df['activity_label']       # target variable
-groups = df['cluster_id']      # for grouped CV
-
-# Run cross-validation
-results = run_cv(X, y, groups=groups, n_splits=5, n_repetitions=5)
-```
-
 ## Methodology
+
+Refer to `METHODOLOGY.md` or the paper for details
 
 ### Machine Learning Approach
 
@@ -102,26 +81,13 @@ results = run_cv(X, y, groups=groups, n_splits=5, n_repetitions=5)
 - **Class balancing**: Sample weighting based on class frequencies
 - **Feature types**: Morgan fingerprints (ECFP6, 1024 bits) and RDKit molecular descriptors
 
-### Evaluation Metrics
-
-- Balanced Accuracy
-- ROC-AUC
-- Precision-Recall curves
-- Calibration analysis
-- Matthews Correlation Coefficient (MCC)
-- Negative Predictive Value (NPV)
-
 ## Model Performance
 
-The models achieve robust performance in androgen receptor inhibition prediction with proper cross-validation accounting for molecular similarity clusters. Detailed results and visualizations are available in the analysis notebooks.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit issues or pull requests. For major changes, please open an issue first to discuss the proposed modifications.
+The models achieve robust performance in androgen receptor inhibition prediction with proper cross-validation accounting for molecular similarity clusters. Detailed results and visualizations are available in the analysis notebooks or the paper.
 
 ## Citation
 
-If you use this code in your research, please cite:
+If you use our dataset and/or this code in your research, please cite:
 
 ```
 [Citation information to be added upon publication]
@@ -133,8 +99,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Contact
 
-For questions or collaboration inquiries, please open an issue on GitHub or contact the corresponding author.
-
-## Acknowledgments
-
-This work contributes to the field of computational toxicology and endocrine disruption screening through machine learning approaches for chemical safety assessment.
+For questions or problems, please open an issue on GitHub or contact the corresponding author.
