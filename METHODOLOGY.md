@@ -30,9 +30,8 @@ The androgen receptor is a critical nuclear hormone receptor involved in male re
 ### Algorithm Selection
 
 **Gradient Boosting Classifier** (scikit-learn implementation)
-- **Rationale**: Handles non-linear relationships and feature interactions common in molecular data
-- **Robustness**: Less prone to overfitting compared to deep learning approaches on small datasets
-- **Interpretability**: Supports feature importance analysis and SHAP explanations
+- **Rationale**: Handles non-linear relationships and feature interactions common in molecular data. Reasonably prone to overfitting, performed well when compared to other algorithms (see paper)
+- **Robustness**: 
 
 ### Cross-Validation Strategy
 
@@ -57,34 +56,6 @@ The androgen receptor is a critical nuclear hormone receptor involved in male re
 - No hyperparameter optimization to focus on methodology demonstration
 - Can be extended with grid search or Bayesian optimization for production use
 
-## Feature Engineering
-
-### Molecular Fingerprints (Primary)
-- **Type**: Morgan fingerprints (ECFP6)
-- **Implementation**: RDKit `GetMorganFingerprintAsBitVect`
-- **Parameters**: radius=3, nBits=1024
-- **Advantages**: Captures local molecular environments, standard in cheminformatics
-
-### Molecular Descriptors (Alternative)
-- **Source**: RDKit descriptor calculation
-- **Coverage**: Physicochemical properties, topological indices, structural features
-- **Usage**: Comparative analysis with fingerprint-based models
-
-## Model Evaluation
-
-### Performance Metrics
-
-1. **Balanced Accuracy**: Primary metric accounting for class imbalance
-2. **ROC-AUC**: Area under receiver operating characteristic curve
-3. **Precision-Recall**: Particularly important for imbalanced datasets
-4. **Matthews Correlation Coefficient (MCC)**: Robust measure for binary classification
-5. **Negative Predictive Value (NPV)**: Important for screening applications
-
-### Calibration Analysis
-- **Reliability Diagrams**: Assess probability calibration quality
-- **Brier Score**: Quantitative measure of calibration performance
-- **Critical for Risk Assessment**: Well-calibrated probabilities essential for regulatory applications
-
 ### Model Interpretation
 
 **SHAP (SHapley Additive exPlanations)**
@@ -92,7 +63,7 @@ The androgen receptor is a critical nuclear hormone receptor involved in male re
 - **Local Explanations**: Individual prediction explanations
 - **Chemical Interpretation**: Identify structural alerts and important molecular features
 
-## Clustering Analysis
+## Tanimoto Based Clustering Analysis
 
 ### Purpose
 - **Chemical Space Exploration**: Understand dataset diversity
@@ -104,33 +75,6 @@ The androgen receptor is a critical nuclear hormone receptor involved in male re
 - **Leader Clustering**: Efficient clustering algorithm for large molecular datasets
 - **Threshold**: Configurable similarity threshold (default: 0.65)
 
-## Reproducibility Considerations
-
-### Random Seed Management
-- **Cross-validation**: Different random seeds for each repetition
-- **Model Training**: Deterministic training when possible
-- **Sampling**: Consistent random states for reproducible results
-
-### Version Control
-- **Package Versions**: Pinned in requirements.txt
-- **Data Provenance**: Clear documentation of data sources and preprocessing
-- **Code Organization**: Modular design for reusability
-
-## Limitations and Future Directions
-
-### Current Limitations
-1. **Dataset Size**: Limited by available experimental data
-2. **Feature Representation**: Single fingerprint type in primary analysis
-3. **Algorithm Scope**: Single ML algorithm demonstration
-4. **Validation**: Internal cross-validation only
-
-### Future Enhancements
-1. **External Validation**: Independent test sets
-2. **Ensemble Methods**: Combining multiple algorithms
-3. **Deep Learning**: Graph neural networks for molecular representation
-4. **Multi-task Learning**: Simultaneous prediction of multiple endpoints
-5. **Uncertainty Quantification**: Conformal prediction or Bayesian approaches
-
 ## Regulatory and Safety Context
 
 ### Applications
@@ -138,11 +82,8 @@ The androgen receptor is a critical nuclear hormone receptor involved in male re
 - **Risk Assessment**: Support for regulatory decision-making
 - **Drug Development**: Early identification of endocrine disruption potential
 - **Chemical Design**: Guide synthesis of safer alternatives
+- **Uncertainty Estimation**: Confidence measures for predictions via Bayesian inference
+- **External Validation**: Model validation on CoMPARA dataset
 
 ### Validation Requirements
-- **Performance Thresholds**: Balanced accuracy, sensitivity, specificity criteria
 - **Applicability Domain**: Clear definition of model's valid application space
-- **Uncertainty Estimation**: Confidence measures for predictions
-- **External Validation**: Independent datasets for model validation
-
-This methodology follows best practices in computational toxicology and regulatory science for developing reliable and interpretable models for chemical safety assessment.
