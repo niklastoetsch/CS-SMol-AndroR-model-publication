@@ -188,13 +188,13 @@ def get_rdkit_descriptors(df: pd.DataFrame, SMILES_column: str = "flat_smiles") 
     
     Notes
     -----
-    This function calculates over 200 molecular descriptors including:
+    This function calculates a set of over 200 molecular descriptors (default in rdkit) including:
     - Molecular weight and formula
     - Lipophilicity (LogP)
     - Hydrogen bond donors/acceptors
     - Topological polar surface area
     - Ring counts and aromaticity
-    - And many more...
+    - ...
     """
 
     rdkit_descriptors = {}
