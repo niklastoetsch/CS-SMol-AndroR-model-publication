@@ -90,8 +90,7 @@ class Predictions:
     """
     Analysis class for binary classification predictions.
     
-    Provides comprehensive evaluation metrics and visualizations for binary
-    classification models, particularly suited for chemical toxicity prediction.
+    Provides convenient evaluation metrics and visualizations.
     
     Parameters
     ----------
