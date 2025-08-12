@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import classification_report
 
 from ml import run_or_retrieve_from_disc
-from utils import add_fingerprints_to_df, FP_COLUMNS, get_fingerprints, get_cluster_assignments_from_fps
+from utils import get_rdkit_descriptors, get_fingerprints, get_cluster_assignments_from_fps
 from analysis import CV, SHAPAnalyzer
 
 
@@ -62,15 +62,15 @@ def main():
     print(f"Activity distribution:\n{df['activity'].value_counts()}")
     
     # Add molecular fingerprints
-    df = add_fingerprints_to_df(df)
-    print(f"Added {len(FP_COLUMNS)} fingerprint features")
+    rdkit_descriptors = get_rdkit_descriptors(df)
+    print(f"Added {len(rdkit_descriptors.columns)} RDKit descriptors")
     # Add cluster assignments based on Tanimoto threshold
     tanimoto_threshold = 0.65
     fps = get_fingerprints(df)
     df["cluster_065"] = get_cluster_assignments_from_fps(fps, tanimoto_threshold)
     
     # Prepare data for ML
-    X = df[FP_COLUMNS]
+    X = rdkit_descriptors
     y = df['activity']
     groups = df['cluster_065']
     
@@ -95,10 +95,6 @@ def main():
     
     print("\nCross-validation Classification Report:")
     print(classification_report(all_y_true, all_y_pred))
-    
-    print("\nTop features by mean SHAP value:")
-    shap_analysis = SHAPAnalyzer(example_splits, example_pipelines, df[FP_COLUMNS])
-    print(shap_analysis.mean_shap_values.sort_values(ascending=False).head())
 
     print("\n" + "=" * 40)
     print("Example completed successfully!")
