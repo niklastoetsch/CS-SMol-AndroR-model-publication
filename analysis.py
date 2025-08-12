@@ -274,7 +274,47 @@ class CV(Predictions):
 
 
 class SHAPAnalyzer():
+class SHAPAnalyzer():
+    """
+    Analyzes feature importance using SHAP (SHapley Additive exPlanations) across cross-validation splits.
 
+    This class computes SHAP values for each model in a cross-validation pipeline, aggregates them,
+    and provides mean SHAP values for feature importance analysis. It is designed to work with
+    scikit-learn pipelines and tabular data, facilitating interpretability of model predictions.
+
+    Parameters
+    ----------
+    splits : list of dict
+        List of split dictionaries, each containing validation indices under the key "val_index".
+    pipelines : dict
+        Dictionary mapping split identifiers to fitted scikit-learn pipelines. Each pipeline must
+        contain a "classifier" step compatible with SHAP.
+    X : pandas.DataFrame
+        The full feature matrix from which validation sets are extracted for SHAP analysis.
+
+    Attributes
+    ----------
+    splits : list of dict
+        The provided cross-validation splits.
+    pipelines : dict
+        The provided pipelines.
+    X : pandas.DataFrame
+        The feature matrix.
+    columns : pandas.Index
+        Feature names.
+    model_list : list
+        List of classifier models extracted from pipelines.
+    shap_values_list : list of np.ndarray
+        SHAP values for each split.
+    mean_shap_values : np.ndarray
+        Mean SHAP values across all splits.
+
+    Usage
+    -----
+    >>> analyzer = SHAPAnalyzer(splits, pipelines, X)
+    >>> shap_values = analyzer.shap_values_list
+    >>> mean_shap = analyzer.mean_shap_values
+    """
     def __init__(self, splits, pipelines, X):
         self.splits = splits
         self.pipelines = pipelines
