@@ -7,7 +7,7 @@ scipy>=1.7.0
 scikit-learn>=1.0.0
 
 # Molecular informatics
-rdkit-pypi>=2023.03.2
+rdkit>=2023.03.2
 
 # Visualization
 matplotlib>=3.4.0
