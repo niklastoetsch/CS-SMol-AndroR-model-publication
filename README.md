@@ -8,13 +8,13 @@ This repository contains the code and analysis for computational toxicology mode
 - **Chemical Screening**: Prioritization of chemicals for experimental testing
 - **Risk Assessment**: Support for regulatory decision-making
 - **Drug Development**: Early identification of endocrine disruption potential
-- **Chemical Design**: Guide synthesis of safer alternatives
+- **Chemical Design**: Guide synthesis of compounds with lowered probability of endocrine disruption
 
 ## Key Features
 
 - **Machine Learning Pipeline**: Gradient boosting classifier with stratified group cross-validation based on Tanimoto clusters
 - **Multiple Feature Representations**: Support for molecular fingerprints and RDKit descriptors
-- **Analysis**: SHAP explainability and performance evaluation
+- **Analysis**: Performance evaluation and SHAP explainability
 
 ## Repository Structure
 
