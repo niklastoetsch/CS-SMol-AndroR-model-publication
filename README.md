@@ -24,35 +24,43 @@ This repository contains the code and analysis for computational toxicology mode
 
 ## Installation
 
-See `Installation.md` for details
-
-### Requirements
-
-This project requires Python 3.7+ and the following packages:
-
-```bash
-pip install pandas numpy scikit-learn matplotlib tqdm rdkit-pypi
-```
-
-For Jupyter notebook execution:
-```bash
-pip install jupyter ipykernel
-```
-
-See `requirements.txt` for specific version requirements.
-
-### Quick Start
-
-1. Clone the repository:
+1. **Clone the repository**:
 ```bash
 git clone https://github.com/niklastoetsch/CS-SMol-AndroR-model-publication.git
 cd CS-SMol-AndroR-model-publication
 ```
 
-2. Install dependencies:
+2. **Create a virtual environment** (recommended):
+```bash
+# Using venv
+python -m venv andror_env
+source andror_env/bin/activate  # On Windows: andror_env\Scripts\activate
+
+# Or using conda
+conda create -n andror_env python=3.9
+conda activate andror_env
+```
+
+3. **Install dependencies**:
 ```bash
 pip install -r requirements.txt
 ```
+
+See `requirements.txt` for specific version requirements.
+
+### Jupyter Notebook Setup
+
+1. **Install Jupyter kernel**:
+```bash
+python -m ipykernel install --user --name andror_env --display-name "AndroR Models"
+```
+
+2. **Start Jupyter**:
+```bash
+jupyter notebook
+```
+
+3. **Select the correct kernel** in Jupyter: Kernel → Change Kernel → "AndroR Models"
 
 ## Data Requirements
 
@@ -62,6 +70,15 @@ pip install -r requirements.txt
 - `AndroR_4_final_dataset_training_set.csv` - Training dataset with molecular features
 
 These files should be placed in the parent directory (`../`) relative to the notebook locations.
+```
+parent_directory/
+├── andror_df_all_clusters.csv
+├── AndroR_4_final_dataset_training_set.csv
+└── CS-SMol-AndroR-model-publication/
+    ├── README.md
+    ├── ml.py
+    └── ...
+```
 
 ## Reproducing the Results from the Paper
 
