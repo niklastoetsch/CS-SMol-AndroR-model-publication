@@ -7,7 +7,7 @@ scipy>=1.7.0
 scikit-learn>=1.0.0
 
 # Molecular informatics
-rdkit-pypi>=2022.3.1
+rdkit-pypi>=2023.03.2
 
 # Visualization
 matplotlib>=3.4.0
@@ -22,6 +22,3 @@ tqdm>=4.60.0
 
 # SHAP for model explainability
 shap>=0.40.0
-
-# Optional: for enhanced molecular visualization
-py3Dmol>=1.8.0
