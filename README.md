@@ -4,6 +4,12 @@
 
 This repository contains the code and analysis for computational toxicology models targeting the androgen receptor (AndroR). The project implements machine learning approaches to predict chemical inhibitory activity against the androgen receptor, with applications in endocrine disruption screening and chemical safety assessment.
 
+## Potential Applications
+- **Chemical Screening**: Prioritization of chemicals for experimental testing
+- **Risk Assessment**: Support for regulatory decision-making
+- **Drug Development**: Early identification of endocrine disruption potential
+- **Chemical Design**: Guide synthesis of safer alternatives
+
 ## Key Features
 
 - **Machine Learning Pipeline**: Gradient boosting classifier with stratified group cross-validation based on Tanimoto clusters
@@ -89,18 +95,38 @@ parent_directory/
 
 ## Methodology
 
-Refer to `METHODOLOGY.md` or the paper for details
+Please also refer to the paper.
+
+### Molecular Representation
+
+1. **SMILES Processing**: Chemical structures are represented as SMILES (Simplified Molecular Input Line Entry System) strings
+2. **Molecular Fingerprints**: Extended-Connectivity Fingerprints (ECFP6) with 1024 bits generated using RDKit
+   - Radius: 3 (equivalent to ECFP6)
+   - Bit vector length: 1024
+   - Hashing function: Morgan algorithm
+3. **Molecular Descriptors**: RDKit molecular descriptors calculated for alternative feature representation
+
+### Data Splitting and Clustering
+
+- **Molecular Clustering**: Chemicals are clustered based on Tanimoto similarity using molecular fingerprints
+- **Cluster-based Splitting**: Cross-validation respects molecular clusters to prevent data leakage from similar compounds
+- **Stratified Grouping**: Maintains class balance while respecting cluster membership
+
 
 ### Machine Learning Approach
 
-- **Algorithm**: Gradient Boosting Classifier (scikit-learn)
+- **Algorithm**: Gradient Boosting Classifier (scikit-learn). Handles non-linear relationships and feature interactions common in molecular data. Reasonably prone to overfitting, performed well when compared to other algorithms (see paper)
+- **Default Hyperparameters**: No hyperparameter optimization to focus on methodology demonstration.
 - **Cross-validation**: Stratified Group K-Fold (5 folds, 5 repetitions)
+- **Sample Weighting**: Balanced class weights computed using scikit-learn's `compute_class_weight`. Applied during model training to handle class imbalance. Alternative to oversampling/undersampling to preserve original data distribution
 - **Class balancing**: Sample weighting based on class frequencies
 - **Feature types**: Morgan fingerprints (ECFP6, 1024 bits) and RDKit molecular descriptors
 
 ## Model Performance
 
 The models achieve robust performance in androgen receptor inhibition prediction with proper cross-validation accounting for molecular similarity clusters. Detailed results and visualizations are available in the analysis notebooks or the paper.
+Performance uncertainties are determined using Bayesian inference for predictions via [Bayesian inference](https://peerj.com/articles/cs-398/).
+Feature importance is determined via SHapley Additive exPlanations (SHAP).
 
 ## Citation
 
