@@ -10,6 +10,9 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from typing import Tuple, List, Optional
+
+import shap
+import tqdm
 from sklearn.metrics import roc_curve, precision_recall_curve, classification_report
 from sklearn.calibration import calibration_curve
 
@@ -268,3 +271,44 @@ class CV(Predictions):
     def _plot_precision_recall_curve(self):
         for f in self.folds:
             f._plot_precision_recall_curve()
+
+
+class SHAPAnalyzer():
+
+    def __init__(self, splits, pipelines, X):
+        self.splits = splits
+        self.pipelines = pipelines
+        self.X = X
+        self.columns = X.columns
+        self.model_list = list(pipelines.values())
+
+        self.shap_values_list = self.compute_shap_values()
+        self.mean_shap_values = self.compute_mean_shap_values()
+
+
+    def compute_shap_values(self):
+        shap_values_list = []
+        for idx, curr_split in tqdm.tqdm(enumerate(self.splits), total=len(self.splits)):
+            curr_idx = curr_split["val_index"]
+            X_val = self.X.iloc[curr_idx]
+            curr_model = self.model_list[idx].named_steps["classifier"]
+
+            explainer = shap.Explainer(curr_model)
+            shap_values = explainer(X_val)
+            shap_values_list.append(shap_values.values)
+
+        return shap_values_list
+    
+    def compute_mean_shap_values(self):
+        shap_values_concatenated = np.concatenate(self.shap_values_list, axis=0)
+        mean_shap_values = np.mean(np.abs(shap_values_concatenated), axis=0)
+        mean_shap_values = pd.Series(mean_shap_values, index=self.columns)
+        return mean_shap_values  
+
+    def plot_shap_values(self, fold_index):
+            """Plot SHAP values for a specific fold."""
+            if fold_index < 0 or fold_index >= len(self.shap_values_list):
+                raise ValueError("Invalid fold index. Please provide a valid index.")
+
+            shap_values = self.shap_values_list[fold_index]
+            shap.summary_plot(shap_values, self.X.iloc[self.splits[fold_index]["val_index"]], feature_names=self.columns)

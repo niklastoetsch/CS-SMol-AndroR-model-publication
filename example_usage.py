@@ -8,12 +8,13 @@ For full analysis, you will need the complete datasets referenced in the noteboo
 
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
 from sklearn.metrics import classification_report
 
-from ml import run_cv
+from ml import run_or_retrieve_from_disc
 from utils import add_fingerprints_to_df, FP_COLUMNS, get_fingerprints, get_cluster_assignments_from_fps
-from analysis import CV
+from analysis import CV, SHAPAnalyzer
 
 
 def create_example_data(n_samples=50):
@@ -78,23 +79,27 @@ def main():
     
     # Test single model
     print("\nTesting Cross Validation ...")    
-    cv_results = run_cv(
+    example_splits, example_pipelines = run_or_retrieve_from_disc(
         X, y, groups=groups,
         n_splits=2, n_repetitions=1,
         training_name="example"
     )
     
-    cv_obj = CV(cv_results)
+    cv_obj = CV(example_splits)
     print(f"Cross-validation completed: {len(cv_obj.folds)} folds")
     print(f"PLEASE NOTE: the results below are based on synthetic, randomly generated data and are expected to exhibit poor performance!")
     
     # Simple aggregated performance
-    all_y_true = np.concatenate([fold['y'] for fold in cv_results])
-    all_y_pred = np.concatenate([fold['y_hat'] for fold in cv_results])
+    all_y_true = np.concatenate([fold['y'] for fold in example_splits])
+    all_y_pred = np.concatenate([fold['y_hat'] for fold in example_splits])
     
     print("\nCross-validation Classification Report:")
     print(classification_report(all_y_true, all_y_pred))
     
+    print("\nTop features by mean SHAP value:")
+    shap_analysis = SHAPAnalyzer(example_splits, example_pipelines, df[FP_COLUMNS])
+    print(shap_analysis.mean_shap_values.sort_values(ascending=False).head())
+
     print("\n" + "=" * 40)
     print("Example completed successfully!")
     print("\nFor full analysis:")
