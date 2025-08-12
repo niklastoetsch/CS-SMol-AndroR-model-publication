@@ -1,19 +1,85 @@
+"""
+Analysis and Evaluation Tools for Androgen Receptor Prediction Models
+
+This module provides classes and functions for evaluating binary classification
+models in the context of chemical toxicity prediction, with emphasis on metrics
+relevant to regulatory and screening applications.
+"""
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from typing import Tuple, List, Optional
+
+import shap
+import tqdm
 from sklearn.metrics import roc_curve, precision_recall_curve, classification_report
 from sklearn.calibration import calibration_curve
 
 
-def calc_npv(tpr, tnr, prevalence):
+def calc_npv(tpr: float, tnr: float, prevalence: float) -> float:
+    """
+    Calculate Negative Predictive Value from sensitivity, specificity, and prevalence.
+    
+    Parameters
+    ----------
+    tpr : float
+        True Positive Rate (sensitivity)
+    tnr : float  
+        True Negative Rate (specificity)
+    prevalence : float
+        Prevalence of positive class in population
+        
+    Returns
+    -------
+    float
+        Negative Predictive Value
+    """
     return tnr * (1-prevalence) / ((tnr * (1-prevalence)) + (1 - tpr) * prevalence)
 
 
-def calc_precision(tpr, tnr, prevalence):
+def calc_precision(tpr: float, tnr: float, prevalence: float) -> float:
+    """
+    Calculate Precision (PPV) from sensitivity, specificity, and prevalence.
+    
+    Parameters
+    ----------
+    tpr : float
+        True Positive Rate (sensitivity)
+    tnr : float
+        True Negative Rate (specificity)  
+    prevalence : float
+        Prevalence of positive class in population
+        
+    Returns
+    -------
+    float
+        Precision (Positive Predictive Value)
+    """
     return tpr * (prevalence) / ((tpr * (prevalence)) + (1 - tnr) * (1-prevalence))
 
 
-def calc_mcc(tpr, tnr, prevalence):
+def calc_mcc(tpr: float, tnr: float, prevalence: float) -> float:
+    """
+    Calculate Matthews Correlation Coefficient from sensitivity, specificity, and prevalence.
+    
+    The MCC is a robust metric for binary classification that accounts for class
+    imbalance and all elements of the confusion matrix.
+    
+    Parameters
+    ----------
+    tpr : float
+        True Positive Rate (sensitivity)
+    tnr : float
+        True Negative Rate (specificity)
+    prevalence : float
+        Prevalence of positive class in population
+        
+    Returns
+    -------
+    float
+        Matthews Correlation Coefficient (-1 to 1)
+    """
     ppv = calc_precision(tpr, tnr, prevalence)
     npv = calc_npv(tpr, tnr, prevalence)
     fdr = 1 - ppv
@@ -24,6 +90,31 @@ def calc_mcc(tpr, tnr, prevalence):
 
 
 class Predictions:
+    """
+    Analysis class for binary classification predictions.
+    
+    Provides convenient evaluation metrics and visualizations.
+    
+    Parameters
+    ----------
+    y : array-like
+        True labels
+    y_hat : array-like  
+        Predicted labels
+    y_hat_proba : array-like, shape (n_samples, 2)
+        Predicted probabilities for each class
+    **kwargs
+        Additional keyword arguments
+        
+    Attributes
+    ----------
+    y : array-like
+        True labels
+    y_hat : array-like
+        Predicted labels  
+    y_hat_proba : array-like
+        Predicted probabilities
+    """
 
     def __init__(self, y, y_hat, y_hat_proba, **kwargs):
         self.y = y
@@ -31,7 +122,15 @@ class Predictions:
         self.y_hat_proba = y_hat_proba
 
     @property
-    def prevalence(self):
+    def prevalence(self) -> float:
+        """
+        Calculate prevalence of positive class ('inhibitor').
+        
+        Returns
+        -------
+        float
+            Fraction of samples that are inhibitors
+        """
         return (self.y == "inhibitor").mean()
 
     def plot_all_metrics(self):
@@ -172,3 +271,113 @@ class CV(Predictions):
     def _plot_precision_recall_curve(self):
         for f in self.folds:
             f._plot_precision_recall_curve()
+
+
+class SHAPAnalyzer():
+class SHAPAnalyzer():
+    """
+    Analyzes feature importance using SHAP (SHapley Additive exPlanations) across cross-validation splits.
+
+    This class computes SHAP values for each model in a cross-validation pipeline, aggregates them,
+    and provides mean SHAP values for feature importance analysis. It is designed to work with
+    scikit-learn pipelines and tabular data, facilitating interpretability of model predictions.
+
+    Parameters
+    ----------
+    splits : list of dict
+        List of split dictionaries, each containing validation indices under the key "val_index".
+    pipelines : dict
+        Dictionary mapping split identifiers to fitted scikit-learn pipelines. Each pipeline must
+        contain a "classifier" step compatible with SHAP.
+    X : pandas.DataFrame
+        The full feature matrix from which validation sets are extracted for SHAP analysis.
+
+    Attributes
+    ----------
+    splits : list of dict
+        The provided cross-validation splits.
+    pipelines : dict
+        The provided pipelines.
+    X : pandas.DataFrame
+        The feature matrix.
+    columns : pandas.Index
+        Feature names.
+    model_list : list
+        List of classifier models extracted from pipelines.
+    shap_values_list : list of np.ndarray
+        SHAP values for each split.
+    mean_shap_values : np.ndarray
+        Mean SHAP values across all splits.
+
+    Usage
+    -----
+    >>> analyzer = SHAPAnalyzer(splits, pipelines, X)
+    >>> shap_values = analyzer.shap_values_list
+    >>> mean_shap = analyzer.mean_shap_values
+    """
+    def __init__(self, splits, pipelines, X):
+        self.splits = splits
+        self.pipelines = pipelines
+        self.X = X
+        self.columns = X.columns
+        self.model_list = list(pipelines.values())
+
+        self.shap_values_list = self.compute_shap_values()
+        self.mean_shap_values = self.compute_mean_shap_values()
+
+
+    def compute_shap_values(self):
+        """
+        Compute SHAP values for each fold/model in cross-validation.
+
+        For each split, this method extracts the validation set and the corresponding trained model,
+        then uses SHAP to compute feature attributions (SHAP values) for the validation samples.
+        The SHAP values quantify the contribution of each feature to the model's output for each sample.
+
+        Returns
+        -------
+        List[np.ndarray]
+            A list where each element is a numpy array of SHAP values for the validation set of a fold.
+            Each array has shape (n_samples_in_fold, n_features).
+
+        Notes
+        -----
+        - SHAP computations can be computationally expensive, especially for large datasets or complex models.
+        - The method uses the default SHAP explainer for the model type.
+        """
+        shap_values_list = []
+        for idx, curr_split in tqdm.tqdm(enumerate(self.splits), total=len(self.splits)):
+            curr_idx = curr_split["val_index"]
+            X_val = self.X.iloc[curr_idx]
+            curr_model = self.model_list[idx].named_steps["classifier"]
+
+            explainer = shap.Explainer(curr_model)
+            shap_values = explainer(X_val)
+            shap_values_list.append(shap_values.values)
+
+        return shap_values_list
+    
+    def compute_mean_shap_values(self):
+        """
+        Compute the mean absolute SHAP values for each feature across all folds.
+        
+        The method concatenates SHAP values from all validation folds, takes the absolute value
+        for each feature, and then computes the mean across all samples and folds.
+        
+        Returns
+        -------
+        pd.Series
+            Mean absolute SHAP value for each feature, indexed by feature name.
+        """
+        shap_values_concatenated = np.concatenate(self.shap_values_list, axis=0)
+        mean_shap_values = np.mean(np.abs(shap_values_concatenated), axis=0)
+        mean_shap_values = pd.Series(mean_shap_values, index=self.columns)
+        return mean_shap_values  
+
+    def plot_shap_values(self, fold_index):
+            """Plot SHAP values for a specific fold."""
+            if fold_index < 0 or fold_index >= len(self.shap_values_list):
+                raise ValueError("Invalid fold index. Please provide a valid index.")
+
+            shap_values = self.shap_values_list[fold_index]
+            shap.summary_plot(shap_values, self.X.iloc[self.splits[fold_index]["val_index"]], feature_names=self.columns)

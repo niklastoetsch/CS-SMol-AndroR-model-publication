@@ -1,2 +1,71 @@
-# don't commit the pickle files: they would clutter the repo and are not intended for long-term storage
+# Pickle files: they would clutter the repo and are not intended for long-term storage
 *pkl
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+andror_env/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# PyCharm
+.idea/
+
+# VSCode
+.vscode/
+
+# OS specific
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Data files (if large)
+*.csv
+*.tsv
+*.xlsx
+*.xls
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+.temp/
+
+# Log files
+*.log
+
+# Model artifacts
+models/
+saved_models/
+checkpoints/
