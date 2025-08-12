@@ -358,6 +358,17 @@ class SHAPAnalyzer():
         return shap_values_list
     
     def compute_mean_shap_values(self):
+        """
+        Compute the mean absolute SHAP values for each feature across all folds.
+        
+        The method concatenates SHAP values from all validation folds, takes the absolute value
+        for each feature, and then computes the mean across all samples and folds.
+        
+        Returns
+        -------
+        pd.Series
+            Mean absolute SHAP value for each feature, indexed by feature name.
+        """
         shap_values_concatenated = np.concatenate(self.shap_values_list, axis=0)
         mean_shap_values = np.mean(np.abs(shap_values_concatenated), axis=0)
         mean_shap_values = pd.Series(mean_shap_values, index=self.columns)
