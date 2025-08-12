@@ -327,6 +327,24 @@ class SHAPAnalyzer():
 
 
     def compute_shap_values(self):
+        """
+        Compute SHAP values for each fold/model in cross-validation.
+
+        For each split, this method extracts the validation set and the corresponding trained model,
+        then uses SHAP to compute feature attributions (SHAP values) for the validation samples.
+        The SHAP values quantify the contribution of each feature to the model's output for each sample.
+
+        Returns
+        -------
+        List[np.ndarray]
+            A list where each element is a numpy array of SHAP values for the validation set of a fold.
+            Each array has shape (n_samples_in_fold, n_features).
+
+        Notes
+        -----
+        - SHAP computations can be computationally expensive, especially for large datasets or complex models.
+        - The method uses the default SHAP explainer for the model type.
+        """
         shap_values_list = []
         for idx, curr_split in tqdm.tqdm(enumerate(self.splits), total=len(self.splits)):
             curr_idx = curr_split["val_index"]
