@@ -223,6 +223,13 @@ class Predictions:
 
         plt.axhline(self.prevalence, linestyle="--", c="k")
 
+    def find_npv_halving_tnr(self):
+        npv, tnr, _ = precision_recall_curve(self.y, self.y_hat_proba[:,0], pos_label="inactive")
+        halved_npv = 1 - (1 - npv[0]) / 2
+        halving_idx = find_closest_index(npv, halved_npv)
+        tnr_at_halving_idx = tnr[halving_idx]
+        return {"NPV": halved_npv, "TNR": tnr_at_halving_idx}
+
 
 class CV(Predictions):
 
@@ -273,7 +280,6 @@ class CV(Predictions):
             f._plot_precision_recall_curve()
 
 
-class SHAPAnalyzer():
 class SHAPAnalyzer():
     """
     Analyzes feature importance using SHAP (SHapley Additive exPlanations) across cross-validation splits.
@@ -381,3 +387,16 @@ class SHAPAnalyzer():
 
             shap_values = self.shap_values_list[fold_index]
             shap.summary_plot(shap_values, self.X.iloc[self.splits[fold_index]["val_index"]], feature_names=self.columns)
+
+
+def find_closest_index(lst: list, val: float) -> int:
+    closest_index = 0
+    closest_value = abs(lst[0] - val)
+
+    for i in range(1, len(lst)):
+        current_value = abs(lst[i] - val)
+        if current_value < closest_value:
+            closest_value = current_value
+            closest_index = i
+
+    return closest_index
