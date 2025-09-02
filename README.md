@@ -19,13 +19,13 @@ This repository contains the code and analysis for computational toxicology mode
 ## Repository Structure
 
 ```
-├── ml.py                     # Core ML pipeline and cross-validation framework
-├── analysis.py               # Analysis classes for model evaluation and visualization
-├── utils.py                  # Utility functions for molecular feature generation
-├── unrestricted_dataset.ipynb           # Main analysis workflow
-├── comparison_for_different_feature_spaces.ipynb  # Feature space comparison
-├── fingerprint_based_clustering.ipynb   # Molecular clustering analysis
-└── SHAP_analysis.ipynb       # Model explainability analysis
+├── ml.py                                                       # Core ML pipeline and cross-validation framework
+├── analysis.py                                                 # Analysis classes for model evaluation and visualization
+├── utils.py                                                    # Utility functions for molecular feature generation
+├── fingerprint_based_clustering.ipynb                          # Molecular clustering for proper grouping during cross-validation
+├── comparison_for_different_feature_spaces.ipynb               # Feature space comparison
+├── compara_predictions_and_CV_for_unrestricted_dataset.ipynb   # Main analysis workflow
+└── SHAP_analysis.ipynb                                         # Model explainability analysis
 ```
 
 ## Installation
@@ -90,7 +90,7 @@ parent_directory/
 
 1. **Clustering analysis**: Execute `fingerprint_based_clustering.ipynb` to obtain the Tanimoto clusters 
 2. **Feature comparison**: Run `comparison_for_different_feature_spaces.ipynb`
-3. **Comparison between full and unrestricted datasets and predictions on CoMPARA dataset**: Execute `unrestricted_dataset.ipynb` for the primary analysis
+3. **Comparison between full and unrestricted datasets and predictions on CoMPARA dataset**: Execute `compara_predictions_and_CV_for_unrestricted_dataset.ipynb` for the primary analysis
 4. **Model interpretation**: Run `SHAP_analysis.ipynb`
 
 ## Methodology
