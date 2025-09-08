@@ -195,7 +195,7 @@ class Predictions:
     def plot_npv_tnr_curve(self):
         self._plot_npv_tnr_curve()
 
-        plt.xlabel('True Negative Rate')
+        plt.xlabel('Specificity')
         plt.ylabel('Negative Predictive Value')
         plt.axhline(1 - self.prevalence, linestyle="--", c="k")
 
