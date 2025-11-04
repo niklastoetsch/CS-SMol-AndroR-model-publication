@@ -20,29 +20,21 @@ fps = utils.get_fingerprints(andror_df_pub)
 
 groups = utils.get_cluster_assignments_from_fps(fps, 0.65, chunk_size=5000)
 
+# by default ecfp6 fingerprints and Rdkit descriptors are used as features for model training
 data_desc_fp = andror_df_pub.drop(columns=['SUBSTANCE', 'flat_smiles', 'final class'])
-#print(data_desc_fp.head())
 
-#from sklearn import preprocessing
-
-#scaler = preprocessing.StandardScaler().fit(data_desc_fp)
-
-#data_desc_fp_scaled = scaler.fit_transform(data_desc_fp)
-#print("scaling conducted")
-
-#print(data_desc_fp_scaled.head())
-
+# use this if only fingerprints should be used as features for model training
 #df2 = andror_df_pub.iloc[:, :-1024]
 #data_desc = df2.drop(columns=['SUBSTANCE', 'flat_smiles', 'final class'])
 #data_desc.head()
 
+# use this, if only descriptors should be used as features for model training
 #df2 = andror_df_pub.drop(andror_df_pub.iloc[:, 3:220],axis = 1)
 #data_fps = df2.drop(columns=['SUBSTANCE', 'flat_smiles', 'final class'])
 #data_fps.head()
 
-#models = ['gbt','svm','catboost','xgb','lr','rf']
-#models = ['gbt','catboost','xgb','lr','rf','svm']
-models = ['xgb']
+models = ['gbt','svm','catboost','xgb','lr','rf']
+
 for model in models:
     print(model)
     splits_desc_fp, pipelines_desc_fp = ml.run_or_retrieve_from_disc_model_scaled(
@@ -53,3 +45,4 @@ for model in models:
         folder = "/home/phns/projects/AndroR/HTS_model/Niklas_scripts/",
         model = model
     )
+
