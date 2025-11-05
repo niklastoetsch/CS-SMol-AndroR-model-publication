@@ -24,7 +24,8 @@ This repository contains the code and analysis for computational toxicology mode
 ├── utils.py                                                    # Utility functions for molecular feature generation
 ├── fingerprint_based_clustering.ipynb                          # Molecular clustering for proper grouping during cross-validation
 ├── comparison_for_different_feature_spaces.ipynb               # Feature space comparison
-├── compara_predictions_and_CV_for_unrestricted_dataset.ipynb   # Main analysis workflow
+├── CV_for_unrestricted_dataset.ipynb                           # Cross-validation for the unrestricted, i.e. published, dataset
+├── CoMPARA_and_PubChem_predictions.ipynb                       # Validation for models trained on our HTS data on external datasets: CoMPARA and PubChem
 └── SHAP_analysis.ipynb                                         # Model explainability analysis
 ```
 
