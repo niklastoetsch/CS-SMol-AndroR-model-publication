@@ -455,3 +455,5 @@ def violinplot_bayesian_estimate_of_performance_metrics(dict_of_CVs: Dict[str, C
         plt.ylabel(f"True Positive Rate (TPR)")
     elif sel_metric == "TNR":
         plt.ylabel(f"True Negative Rate (TNR)")
+
+    return comparison_df_CV
