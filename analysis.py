@@ -9,12 +9,13 @@ relevant to regulatory and screening applications.
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from typing import Tuple, List, Optional
+from typing import Dict
 
 import shap
 import tqdm
-from sklearn.metrics import roc_curve, precision_recall_curve, classification_report
+from sklearn.metrics import roc_curve, precision_recall_curve, classification_report, confusion_matrix
 from sklearn.calibration import calibration_curve
+import seaborn as sns
 
 
 def calc_npv(tpr: float, tnr: float, prevalence: float) -> float:
@@ -400,3 +401,57 @@ def find_closest_index(lst: list, val: float) -> int:
             closest_index = i
 
     return closest_index
+
+
+def violinplot_bayesian_estimate_of_performance_metrics(dict_of_CVs: Dict[str, CV], sel_metric="balanced accuracy", sample_size_posterior=10000, prior=1):
+    comparison_df_CV = {}
+
+    label_threshold = 0.5
+
+    for feature_list, cv in dict_of_CVs.items():
+        metric_estimates = []
+        for fold in cv.folds:
+            curr_cm = confusion_matrix(fold.y == "inhibitor", fold.y_hat_proba[:, 1] >= label_threshold, labels=[True, False])
+            TP, FN, FP, TN = curr_cm.flatten()
+            tpr_samples = np.random.beta(TP + prior, FN + prior, size=sample_size_posterior)
+            tnr_samples = np.random.beta(TN + prior, FP + prior, size=sample_size_posterior)
+            ppv_samples = np.random.beta(TP + prior, FP + prior, size=sample_size_posterior)
+            npv_samples = np.random.beta(TN + prior, FN + prior, size=sample_size_posterior)
+            if sel_metric == "balanced accuracy":
+                curr_samples = (tpr_samples + tnr_samples) / 2
+            elif sel_metric == "MCC":
+                curr_samples = np.sqrt(tpr_samples * tnr_samples * ppv_samples * npv_samples) - np.sqrt(
+                    (1 - tpr_samples) * (1 - tnr_samples) * (1 - ppv_samples) * (1 - npv_samples))
+            elif sel_metric == "NPV":
+                curr_samples = npv_samples
+            elif sel_metric == "TNR":
+                curr_samples = tnr_samples
+            elif sel_metric == "TPR":
+                curr_samples = tpr_samples
+            elif sel_metric == "PPV":
+                curr_samples = ppv_samples
+            metric_estimates += list(curr_samples)
+        comparison_df_CV[feature_list] = metric_estimates
+
+    comparison_df_CV = pd.DataFrame(comparison_df_CV)
+
+    sns.violinplot(comparison_df_CV)
+    # rotate xlabels
+    plt.xticks(rotation=75)
+
+    if sel_metric == "MCC":
+        plt.ylim(-0.1, 1.)
+        plt.axhline(0., color='k', linestyle='--')
+        plt.ylabel(f"Matthews Correlation Coefficient (MCC)")
+    elif sel_metric == "balanced accuracy":
+        plt.ylim(0.49, 1.01)
+        plt.axhline(0.5, color='k', linestyle='--')
+        plt.ylabel(f"Balanced Accuracy")
+    elif sel_metric == "NPV":
+        plt.ylabel(f"Negative Predictive Value (NPV)")
+    elif sel_metric == "PPV":
+        plt.ylabel(f"Positive Predictive Value (PPV)")
+    elif sel_metric == "TPR":
+        plt.ylabel(f"True Positive Rate (TPR)")
+    elif sel_metric == "TNR":
+        plt.ylabel(f"True Negative Rate (TNR)")
