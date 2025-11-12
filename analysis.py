@@ -404,6 +404,32 @@ def find_closest_index(lst: list, val: float) -> int:
 
 
 def violinplot_bayesian_estimate_of_performance_metrics(dict_of_CVs: Dict[str, CV], sel_metric="balanced accuracy", sample_size_posterior=10000, prior=1):
+    """
+    Generate violin plots comparing Bayesian estimates of performance metrics across cross-validation folds.
+
+    This function computes Bayesian posterior estimates for a selected performance metric (e.g., balanced accuracy,
+    MCC, NPV, TNR, TPR, or PPV) for each fold in each cross-validation (CV) object provided. It samples from the
+    posterior distributions of the metrics using a Beta prior, aggregates the results, and visualizes the distributions
+    as violin plots for comparison across different feature sets.
+
+    Parameters
+    ----------
+    dict_of_CVs : Dict[str, CV]
+        Dictionary mapping feature set names to CV objects. Each CV object should have a 'folds' attribute,
+        where each fold contains true labels (`y`) and predicted probabilities (`y_hat_proba`).
+    sel_metric : str, optional
+        The performance metric to visualize. Options are "balanced accuracy", "MCC", "NPV", "TNR", "TPR", or "PPV".
+        Default is "balanced accuracy".
+    sample_size_posterior : int, optional
+        Number of samples to draw from the posterior distributions for each metric estimate. Default is 10000.
+    prior : float, optional
+        Prior parameter for the Beta distributions used in Bayesian estimation. Default is 1.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame containing the sampled metric estimates for each feature set, suitable for further analysis or plotting.
+    """
     comparison_df_CV = {}
 
     label_threshold = 0.5
