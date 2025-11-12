@@ -408,15 +408,14 @@ def violinplot_bayesian_estimate_of_performance_metrics(dict_of_CVs: Dict[str, C
     Generate violin plots comparing Bayesian estimates of performance metrics across cross-validation folds.
 
     This function computes Bayesian posterior estimates for a selected performance metric (e.g., balanced accuracy,
-    MCC, NPV, TNR, TPR, or PPV) for each fold in each cross-validation (CV) object provided. It samples from the
-    posterior distributions of the metrics using a Beta prior, aggregates the results, and visualizes the distributions
-    as violin plots for comparison across different feature sets.
+    MCC, NPV, TNR, TPR, or PPV) for each fold in each cross-validation (CV) object provided. It samples from the 
+    posterior distributions of the metrics using a Beta prior (for further details, refer to https://peerj.com/articles/cs-398/), 
+    aggregates the results, and visualizes the distributions as violin plots for comparison across different feature sets.
 
     Parameters
     ----------
     dict_of_CVs : Dict[str, CV]
-        Dictionary mapping feature set names to CV objects. Each CV object should have a 'folds' attribute,
-        where each fold contains true labels (`y`) and predicted probabilities (`y_hat_proba`).
+        Dictionary mapping feature set names to CV objects.
     sel_metric : str, optional
         The performance metric to visualize. Options are "balanced accuracy", "MCC", "NPV", "TNR", "TPR", or "PPV".
         Default is "balanced accuracy".
