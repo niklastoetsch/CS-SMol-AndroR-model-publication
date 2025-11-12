@@ -75,6 +75,7 @@ jupyter notebook
 
 - `andror_df_all_clusters.csv` - Complete dataset with cluster assignments
 - `AndroR_4_final_dataset_training_set.csv` - Training dataset with molecular features
+- `EDdata_merged.sdf` for the PubChem data. These are available from https://zenodo.org/records/3935808
 
 These files should be placed in the parent directory (`../`) relative to the notebook locations.
 ```
