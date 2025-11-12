@@ -9,12 +9,13 @@ relevant to regulatory and screening applications.
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from typing import Tuple, List, Optional
+from typing import Dict
 
 import shap
 import tqdm
-from sklearn.metrics import roc_curve, precision_recall_curve, classification_report
+from sklearn.metrics import roc_curve, precision_recall_curve, classification_report, confusion_matrix
 from sklearn.calibration import calibration_curve
+import seaborn as sns
 
 
 def calc_npv(tpr: float, tnr: float, prevalence: float) -> float:
@@ -400,3 +401,86 @@ def find_closest_index(lst: list, val: float) -> int:
             closest_index = i
 
     return closest_index
+
+
+def violinplot_bayesian_estimate_of_performance_metrics(dict_of_CVs: Dict[str, CV], sel_metric="balanced accuracy", sample_size_posterior=10000, prior=1):
+    """
+    Generate violin plots comparing Bayesian estimates of performance metrics across cross-validation folds.
+
+    This function computes Bayesian posterior estimates for a selected performance metric (e.g., balanced accuracy,
+    MCC, NPV, TNR, TPR, or PPV) for each fold in each cross-validation (CV) object provided. It samples from the 
+    posterior distributions of the metrics using a Beta prior (for further details, refer to https://peerj.com/articles/cs-398/), 
+    aggregates the results, and visualizes the distributions as violin plots for comparison across different feature sets.
+
+    Parameters
+    ----------
+    dict_of_CVs : Dict[str, CV]
+        Dictionary mapping feature set names to CV objects.
+    sel_metric : str, optional
+        The performance metric to visualize. Options are "balanced accuracy", "MCC", "NPV", "TNR", "TPR", or "PPV".
+        Default is "balanced accuracy".
+    sample_size_posterior : int, optional
+        Number of samples to draw from the posterior distributions for each metric estimate. Default is 10000.
+    prior : float, optional
+        Prior parameter for the Beta distributions used in Bayesian estimation. Default is 1.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame containing the sampled metric estimates for each feature set, suitable for further analysis or plotting.
+    """
+    comparison_df_CV = {}
+
+    label_threshold = 0.5
+
+    for feature_list, cv in dict_of_CVs.items():
+        metric_estimates = []
+        for fold in cv.folds:
+            curr_cm = confusion_matrix(fold.y == "inhibitor", fold.y_hat_proba[:, 1] >= label_threshold, labels=[True, False])
+            TP, FN, FP, TN = curr_cm.flatten()
+            tpr_samples = np.random.beta(TP + prior, FN + prior, size=sample_size_posterior)
+            tnr_samples = np.random.beta(TN + prior, FP + prior, size=sample_size_posterior)
+            ppv_samples = np.random.beta(TP + prior, FP + prior, size=sample_size_posterior)
+            npv_samples = np.random.beta(TN + prior, FN + prior, size=sample_size_posterior)
+            if sel_metric == "balanced accuracy":
+                curr_samples = (tpr_samples + tnr_samples) / 2
+            elif sel_metric == "MCC":
+                curr_samples = np.sqrt(tpr_samples * tnr_samples * ppv_samples * npv_samples) - np.sqrt(
+                    (1 - tpr_samples) * (1 - tnr_samples) * (1 - ppv_samples) * (1 - npv_samples))
+            elif sel_metric == "NPV":
+                curr_samples = npv_samples
+            elif sel_metric == "TNR":
+                curr_samples = tnr_samples
+            elif sel_metric == "TPR":
+                curr_samples = tpr_samples
+            elif sel_metric == "PPV":
+                curr_samples = ppv_samples
+            metric_estimates += list(curr_samples)
+        comparison_df_CV[feature_list] = metric_estimates
+
+    comparison_df_CV = pd.DataFrame(comparison_df_CV)
+
+    sns.violinplot(comparison_df_CV)
+    # rotate xlabels
+    plt.xticks(rotation=75)
+
+    ylabels = {
+        "MCC": "Matthews Correlation Coefficient (MCC)",
+        "balanced accuracy": "Balanced Accuracy (BA)",
+        "NPV": "Negative Predictive Value (NPV)",
+        "PPV": "Positive Predictive Value (PPV)",
+        "TPR": "True Positive Rate (TPR)",
+        "TNR": "True Negative Rate (TNR)",
+    }
+
+
+    if sel_metric == "MCC":
+        plt.ylim(-0.1, 1.)
+        plt.axhline(0., color='k', linestyle='--')
+    elif sel_metric == "balanced accuracy":
+        plt.ylim(0.49, 1.01)
+        plt.axhline(0.5, color='k', linestyle='--')
+
+    plt.ylabel(ylabels[sel_metric])
+
+    return comparison_df_CV

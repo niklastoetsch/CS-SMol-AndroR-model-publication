@@ -9,8 +9,9 @@ boosting classifiers with stratified group cross-validation.
 import os
 import numpy as np
 import pickle
-from typing import Dict, List, Tuple, Optional, Any
+from typing import Dict, List, Tuple, Any
 
+import pandas as pd
 import tqdm
 
 from sklearn.model_selection import StratifiedGroupKFold
@@ -197,3 +198,43 @@ def run_or_retrieve_from_disc(X, y, groups=None, n_splits: int = 5, n_repetition
             pickle.dump(pipelines_created, f)
 
     return splits, pipelines_created
+
+
+def fit_model_or_retrieve_from_disc(pipeline_filename: str, X: pd.DataFrame, y: pd.Series):
+    """
+    Load a fitted pipeline from disk or train a new one if not found.
+
+    This function checks if a fitted machine learning pipeline exists at the specified
+    file path. If it does, the pipeline is loaded from disk. Otherwise, a new pipeline
+    is created, trained on the provided data, and saved to disk for future use.
+
+    Parameters
+    ----------
+    pipeline_filename : str
+        Path to the pickle file containing the fitted pipeline.
+    X : pd.DataFrame
+        Training features DataFrame.
+    y : pd.Series
+        Training labels Series.
+
+    Returns
+    -------
+    fitted_pipeline : sklearn.pipeline.Pipeline
+        The fitted pipeline object.
+    """
+    if os.path.exists(pipeline_filename):
+        with open(pipeline_filename, 'rb') as f:
+            fitted_pipeline = pickle.load(f)
+    else:
+        fitted_pipeline = create_pipeline()
+        sample_weights_unrestricted = compute_sample_weights(y)
+        fitted_pipeline.fit(
+            X=X, 
+            y=y, 
+            classifier__sample_weight=sample_weights_unrestricted,
+        )
+
+        with open(pipeline_filename, 'wb') as f:
+            pickle.dump(fitted_pipeline, f)
+
+    return fitted_pipeline
