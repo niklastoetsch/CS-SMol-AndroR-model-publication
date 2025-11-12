@@ -439,21 +439,23 @@ def violinplot_bayesian_estimate_of_performance_metrics(dict_of_CVs: Dict[str, C
     # rotate xlabels
     plt.xticks(rotation=75)
 
+    ylabels = {
+        "MCC": "Matthews Correlation Coefficient (MCC)",
+        "balanced accuracy": "Balanced Accuracy (BA)",
+        "NPV": "Negative Predictive Value (NPV)",
+        "PPV": "Positive Predictive Value (PPV)",
+        "TPR": "True Positive Rate (TPR)",
+        "TNR": "True Negative Rate (TNR)",
+    }
+
+
     if sel_metric == "MCC":
         plt.ylim(-0.1, 1.)
         plt.axhline(0., color='k', linestyle='--')
-        plt.ylabel(f"Matthews Correlation Coefficient (MCC)")
     elif sel_metric == "balanced accuracy":
         plt.ylim(0.49, 1.01)
         plt.axhline(0.5, color='k', linestyle='--')
-        plt.ylabel(f"Balanced Accuracy")
-    elif sel_metric == "NPV":
-        plt.ylabel(f"Negative Predictive Value (NPV)")
-    elif sel_metric == "PPV":
-        plt.ylabel(f"Positive Predictive Value (PPV)")
-    elif sel_metric == "TPR":
-        plt.ylabel(f"True Positive Rate (TPR)")
-    elif sel_metric == "TNR":
-        plt.ylabel(f"True Negative Rate (TNR)")
+
+    plt.ylabel(ylabels[sel_metric])
 
     return comparison_df_CV
