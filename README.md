@@ -71,17 +71,23 @@ jupyter notebook
 
 ## Data Requirements
 
-**Note**: The datasets referenced in the notebooks are not included in this repository. To reproduce the analysis, you will need:
+**Note**: The datasets referenced in the notebooks are not included in this repository. 
+Several notebooks will not be executable for users as they require `AndroR_4_final_dataset_training_ALL_STD_rdkit.csv` or `andror_df_all_clusters.csv` which is generated from the former.
+These contain chemical structures from Bayer Crop Science's internal library which are not published.
+`AndroR_4_final_dataset_training_PUB_STD_rdkit.csv` refers to the unrestricted dataset that we publish alongside our manuscript containing ~25k structures.
 
-- `andror_df_all_clusters.csv` - Complete dataset with cluster assignments
-- `AndroR_4_final_dataset_training_set.csv` - Training dataset with molecular features
+To reproduce the analysis, you will need:
+
+- `AndroR_4_final_dataset_training_PUB_STD_rdkit.csv` for the published unrestricted HTS dataset from Bayer Crop Science. TODO: add downloadlink or file to repo
+- `AR_binding_CoMPARA_raw_no_stereo_unique_SMILES.txt` for the CoMPARA data. 
 - `EDdata_merged.sdf` for the PubChem data. These are available from https://zenodo.org/records/3935808
 
 These files should be placed in the parent directory (`../`) relative to the notebook locations.
 ```
 parent_directory/
-├── andror_df_all_clusters.csv
-├── AndroR_4_final_dataset_training_set.csv
+├── AndroR_4_final_dataset_training_PUB_STD_rdkit.csv
+├── AR_binding_CoMPARA_raw_no_stereo_unique_SMILES.txt
+├── EDdata_merged.sdf
 └── CS-SMol-AndroR-model-publication/
     ├── README.md
     ├── ml.py
