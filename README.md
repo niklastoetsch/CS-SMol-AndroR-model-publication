@@ -79,7 +79,7 @@ These contain chemical structures from Bayer Crop Science's internal library whi
 To reproduce the analysis, you will need:
 
 - `AndroR_4_final_dataset_training_PUB_STD_rdkit.csv` for the published unrestricted HTS dataset from Bayer Crop Science. TODO: add downloadlink or file to repo
-- `AR_binding_CoMPARA_raw_no_stereo_unique_SMILES.txt` for the CoMPARA data. 
+- `AR_binding_CoMPARA_raw.csv` for the CoMPARA data. These need to be downloaded from https://michem.unimib.it/download/data/ar-binding-compara-project/
 - `EDdata_merged.sdf` for the PubChem data. These are available from https://zenodo.org/records/3935808
 
 These files should be placed in the parent directory (`../`) relative to the notebook locations.
