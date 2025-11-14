@@ -18,6 +18,7 @@ from sklearn.model_selection import StratifiedGroupKFold
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.utils.class_weight import compute_class_weight
+from sklearn.preprocessing import StandardScaler
 
 
 PIPELINE_REGISTRY = {}
@@ -36,9 +37,10 @@ def create_pipeline() -> Pipeline:
     --------
     >>> pipeline = create_pipeline()
     >>> pipeline.named_steps.keys()
-    dict_keys(['classifier'])
+    dict_keys(['scaler', 'classifier'])
     """
     return Pipeline(steps=[
+        ('scaler', StandardScaler()),
         ('classifier', GradientBoostingClassifier(verbose=False)),
     ])
 
