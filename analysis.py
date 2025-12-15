@@ -169,7 +169,6 @@ class Predictions:
     def plot_roc_curve(self, plot_thresholds=[]):
         self._plot_roc_curve()
 
-        # plt.plot(fpr_list, tpr_list, marker="o", c="k")
         plt.plot([0, 1], [0, 1], 'k--')
         plt.xlabel('False Positive Rate')
         plt.ylabel('True Positive Rate')
