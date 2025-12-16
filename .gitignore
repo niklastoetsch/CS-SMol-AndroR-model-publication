@@ -55,6 +55,8 @@ Thumbs.db
 *.tsv
 *.xlsx
 *.xls
+*.txt
+*.dxp
 
 # Temporary files
 *.tmp
